@@ -14,5 +14,5 @@ python chiriin3d_reverse.py dem.stl all > dem_reverse.stl
 出力は、stlを標準出力に書き出すので リダイレクト > で保存してください。
 
 ##ライセンス
-本プログラムWTFPLライセンスです。
+本プログラムはWTFPLライセンスです。
 ただし、地理院地図3Dのデータに関しては、そちらを参照ください。
