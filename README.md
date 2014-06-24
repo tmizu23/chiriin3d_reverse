@@ -1,6 +1,6 @@
 chiriin3d_reverse
 =================
-![mountain](mountain.jpg)   
+![model](model.jpg)![kanten](kanten.jpg)![mountain](mountain.jpg)   
 これは[地理院地図3D](http://cyberjapandata.gsi.go.jp/3d/)を裏返すプログラムです。寒天やチョコを流し込むのにご利用ください。
 
 ##使い方
