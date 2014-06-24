@@ -23,5 +23,5 @@ left,rightで出力したモデルをそれぞれ3Dプリントしてくださ�
 出力の大きさは、幅が10cmぐらいが最適だと思います。
 
 ##ライセンス
-本プログラムは[WTFPLライセンス](http://ja.wikipedia.org/wiki/WTFPL)です。
+本プログラムは[WTFPLライセンス](http://ja.wikipedia.org/wiki/WTFPL)です。    
 ただし、地理院地図3Dのデータに関しては、[地理院タイル利用規約](http://portal.cyberjapan.jp/help/termsofuse.html)を参照ください。
