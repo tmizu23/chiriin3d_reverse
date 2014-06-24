@@ -18,9 +18,9 @@ python chiriin3d_reverse.py dem.stl all > dem_reverse.stl
 出力は、stlのテキストを標準出力に書き出すので リダイレクト > でファイルに保存してください。
 
 ##3Dプリント
-[meshlab](http://meshlab.sourceforge.net/)などでstlデータを確認してください。
-left,rightで出力したモデルをそれぞれ3Dプリントしてください。
-出力の大きさは、幅が10cmぐらいが最適だと思います。
+[meshlab](http://meshlab.sourceforge.net/)などでstlデータを確認してください。   
+left,rightで出力したモデルをそれぞれ3Dプリントしてください。   
+出力の大きさは、幅が10cmぐらいが最適だと思います。   
 
 ##ライセンス
 本プログラムは[WTFPLライセンス](http://ja.wikipedia.org/wiki/WTFPL)です。    
