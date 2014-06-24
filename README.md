@@ -1,6 +1,6 @@
 chiriin3d_reverse
 =================
-これは[地理院地図3D](http://cyberjapandata.gsi.go.jp/3d/)を裏返すプログラムです。3Dプリンタで印刷したのち、お好きなものを流し込みください。   
+これは[地理院地図3D](http://cyberjapandata.gsi.go.jp/3d/)を裏返して型にするプログラムです。3Dプリンタで印刷したのち、お好きなものを流し込みください。   
 
 ![model](model.jpg)![kanten](kanten.jpg)![mountain](mountain.jpg)   
 
