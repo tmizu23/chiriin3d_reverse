@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/Chiriin3D_reverse" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>

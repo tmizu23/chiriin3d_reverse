@@ -1,452 +1,250 @@
-# -*- coding: utf-8 -*-
-import sys
-   
-def write_square(v1,v2,v3,v4):
-   print "facet normal " + "1" + " " + "1" + " " + "1"
-   print "outer loop"
-   print "vertex" + " " + str(v1[0]) + " " + str(v1[1]) + " " + str(v1[2])
-   print "vertex" + " " + str(v2[0]) + " " + str(v2[1]) + " " + str(v2[2])
-   print "vertex" + " " + str(v3[0]) + " " + str(v3[1]) + " " + str(v3[2])
-   print "endloop"
-   print "endfacet"
-   print "facet normal " + "1" + " " + "1" + " " + "1"
-   print "outer loop"
-   print "vertex" + " " + str(v1[0]) + " " + str(v1[1]) + " " + str(v1[2])
-   print "vertex" + " " + str(v3[0]) + " " + str(v3[1]) + " " + str(v3[2])
-   print "vertex" + " " + str(v4[0]) + " " + str(v4[1]) + " " + str(v4[2])
-   print "endloop"
-   print "endfacet"
-   
-def write_triangle(v1,v2,v3):
-   print "facet normal " + "1" + " " + "1" + " " + "1"
-   print "outer loop"
-   print "vertex" + " " + str(v1[0]) + " " + str(v1[1]) + " " + str(v1[2])
-   print "vertex" + " " + str(v2[0]) + " " + str(v2[1]) + " " + str(v2[2])
-   print "vertex" + " " + str(v3[0]) + " " + str(v3[1]) + " " + str(v3[2])
-   print "endloop"
-   print "endfacet"
+﻿# -*- coding: utf-8 -*-
+"""
+/***************************************************************************
+ Chiriin3D_reverse
+                                 A QGIS plugin
+ This plugin reverses a Chiriin Chizu 3D model.
+                              -------------------
+        begin                : 2014-10-24
+        git sha              : $Format:%H$
+        copyright            : (C) 2014 by Takayuki Mizutani
+        email                : mizutani.takayuki@gmail.com
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtGui import QAction, QIcon, QFileDialog, QMessageBox
+# Initialize Qt resources from file resources.py
+import resources_rc
+# Import the code for the dialog
+from chiriin3d_reverse_dialog import Chiriin3D_reverseDialog
+import os.path
+import reverse
+
+class Chiriin3D_reverse:
+    """QGIS Plugin Implementation."""
+
+    def __init__(self, iface):
+        """Constructor.
+
+        :param iface: An interface instance that will be passed to this class
+            which provides the hook by which you can manipulate the QGIS
+            application at run time.
+        :type iface: QgsInterface
+        """
+        # Save reference to the QGIS interface
+        self.iface = iface
+        # initialize plugin directory
+        self.plugin_dir = os.path.dirname(__file__)
+        # initialize locale
+        locale = QSettings().value('locale/userLocale')[0:2]
+        locale_path = os.path.join(
+            self.plugin_dir,
+            'i18n',
+            'Chiriin3D_reverse_{}.qm'.format(locale))
+
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
+
+            if qVersion() > '4.3.3':
+                QCoreApplication.installTranslator(self.translator)
+
+        # Create the dialog (after translation) and keep reference
+        self.dlg = Chiriin3D_reverseDialog()
+
+        # Declare instance attributes
+        self.actions = []
+        self.menu = self.tr(u'&Chiriin3D reverse')
+        # TODO: We are going to let the user set this up in a future iteration
+        self.toolbar = self.iface.addToolBar(u'Chiriin3D_reverse')
+        self.toolbar.setObjectName(u'Chiriin3D_reverse')
+
+    # noinspection PyMethodMayBeStatic
+    def tr(self, message):
+        """Get the translation for a string using Qt translation API.
+
+        We implement this ourselves since we do not inherit QObject.
+
+        :param message: String for translation.
+        :type message: str, QString
+
+        :returns: Translated version of message.
+        :rtype: QString
+        """
+        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+        return QCoreApplication.translate('Chiriin3D_reverse', message)
 
 
-argvs = sys.argv
-filename = argvs[1]
-if argvs[2]=="left":
-   out="left"
-elif argvs[2]=="right":
-   out="right"
-else:
-   out="all"
-   
-### calc max_height   
-f = open(filename,"r")
-k=0
-max_height=0
+    def add_action(
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None):
+        """Add a toolbar icon to the InaSAFE toolbar.
 
-while True:
-   l = f.readline()
-   if "facet normal" in l:
-      f.readline()
-      v1 = [float(s) for s in f.readline().split()[1:4]]
-      v2 = [float(s) for s in f.readline().split()[1:4]]
-      v3 = [float(s) for s in f.readline().split()[1:4]]
-      f.readline()
-      f.readline()
-      k=k+1
-      if 1<= k and k<= 255*2*255:
-         max_height = max([max_height,v1[1],v2[1],v3[1]])
-      if k==1:
-         x1=v1[0]
-         z1=v1[2]
-      elif k==255*2:
-         x2=v3[0]
-      elif k==255*2*127:
-         z2=v2[2]
-         y5=v3[1]
-      elif k==255*2*126+1:
-         y2=v2[1]
-      elif k==255*2*255:
-         z3=v2[2]
-      elif k==255*2*255+1:
-         y=v2[1]
-   elif k>255*2*255+1:
-      break
-f.close()
+        :param icon_path: Path to the icon for this action. Can be a resource
+            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
+        :type icon_path: str
 
-### set value
-h_offset=max_height*1.2
-w_offset=10
-edge=3
+        :param text: Text that should be shown in menu items for this action.
+        :type text: str
 
-### writeout stl
-f = open(filename,"r")
-k=0
+        :param callback: Function to be called when the action is triggered.
+        :type callback: function
 
-print "solid 3d_data_reverse"
-while True:
-   l = f.readline()
-   if "facet normal" in l:
-      k=k+1
-      f.readline()
-      v1 = [float(s) for s in f.readline().split()[1:4]]
-      v2 = [float(s) for s in f.readline().split()[1:4]]
-      v3 = [float(s) for s in f.readline().split()[1:4]]
-      f.readline()
-      f.readline()
-      #起伏
-      if (out=="all" or out=="left") and 0< k and k<= 255*2*127:
-         write_triangle([v2[0],v2[1],v2[2]-w_offset],[v1[0],v1[1],v1[2]-w_offset],[v3[0],v3[1],v3[2]-w_offset])
-      elif (out=="all" or out=="right") and 255*2*127< k and k<= 255*2*255:
-         write_triangle([v2[0],v2[1],v2[2]+w_offset],[v1[0],v1[1],v1[2]+w_offset],[v3[0],v3[1],v3[2]+w_offset])
-      #横壁の奥1
-      elif (out=="all" or out=="left") and 255*2*255< k and k<= 255*2*255+127*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]-w_offset],[v1[0],v1[1],v1[2]-w_offset],[v3[0],v3[1],v3[2]-w_offset])
-         if k%3==1:
-            write_triangle([x1-edge,y,z2-w_offset],[v1[0],y,v1[2]-w_offset],[v3[0],y,v3[2]-w_offset])
-      elif (out=="all" or out=="right") and 255*2*255+127*3< k and k<= 255*2*255+255*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]+w_offset],[v1[0],v1[1],v1[2]+w_offset],[v3[0],v3[1],v3[2]+w_offset])
-         if k%3==1:
-            write_triangle([x1-edge,y,z2+w_offset],[v1[0],y,v1[2]+w_offset],[v3[0],y,v3[2]+w_offset])
-      #横壁の手前1
-      elif (out=="all" or out=="left") and 255*2*255+255*3< k and k<= 255*2*255+255*3+127*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]-w_offset],[v1[0],v1[1],v1[2]-w_offset],[v3[0],v3[1],v3[2]-w_offset])
-         if k%3==1:
-            write_triangle([x2+edge,y,z2-w_offset],[v2[0],y,v2[2]-w_offset],[v1[0],y,v1[2]-w_offset])
-      elif (out=="all" or out=="right") and 255*2*255+255*3+127*3< k and k<= 255*2*255+255*3+255*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]+w_offset],[v1[0],v1[1],v1[2]+w_offset],[v3[0],v3[1],v3[2]+w_offset])
-         if k%3==1:
-            write_triangle([x2+edge,y,z2+w_offset],[v2[0],y,v2[2]+w_offset],[v1[0],y,v1[2]+w_offset])
-      #横壁の横1
-      elif (out=="all" or out=="left") and 255*2*255+255*3+255*3< k and k<= 255*2*255+255*3+255*3+255*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]-w_offset],[v1[0],v1[1],v1[2]-w_offset],[v3[0],v3[1],v3[2]-w_offset])
-         if k%3==1:
-            write_triangle([x1,y,z1-w_offset-edge],[v2[0],y,v2[2]-w_offset],[v1[0],y,v1[2]-w_offset])
-      elif (out=="all" or out=="right") and 255*2*255+255*3+255*3+255*3< k and k<= 255*2*255+255*3+255*3+255*3+255*3 and k%3!=0:
-         write_triangle([v2[0],v2[1],v2[2]+w_offset],[v1[0],v1[1],v1[2]+w_offset],[v3[0],v3[1],v3[2]+w_offset])
-         if k%3==1:
-            write_triangle([x1,y,z3+w_offset+edge],[v2[0],y,v2[2]+w_offset],[v3[0],y,v3[2]+w_offset])
-      #断面1
-      if (out=="all" or out=="left") and 255*2*126 < k and k <= 255*2*127:
-         if k%2 == 0:
-            write_square([v2[0],v2[1],v2[2]-w_offset],[v3[0],v3[1],v3[2]-w_offset],[v3[0],max_height,v3[2]-w_offset],[v2[0],max_height,v2[2]-w_offset])
-            write_triangle([v3[0],max_height,v3[2]-w_offset],[x2,max_height+1,z2-w_offset],[v2[0],max_height,v2[2]-w_offset])
-      if (out=="all" or out=="right") and 255*2*127 < k and k <= 255*2*128 :
-         if k%2 == 1:
-            write_square([v3[0],v3[1],v3[2]+w_offset],[v1[0],v1[1],v1[2]+w_offset],[v1[0],max_height,v1[2]+w_offset],[v3[0],max_height,v3[2]+w_offset])
-            write_triangle([v1[0],max_height,v1[2]+w_offset],[x2,max_height+1,z2+w_offset],[v3[0],max_height,v3[2]+w_offset])
-   elif not l:
-      break
-   else:
-      pass
-f.close()
-'''
- z1   z2   z3
-1 _________
- |    |    |
- |    |    |
- |____|____|
-2
-(height) 
- 
-'''
+        :param enabled_flag: A flag indicating if the action should be enabled
+            by default. Defaults to True.
+        :type enabled_flag: bool
 
-if (out=="all" or out=="left"):
-   #上壁の奥1
-   v1=[x1-edge,y,z1-w_offset-edge]
-   v2=[x1,y,z1-w_offset]
-   v3=[x1-edge,y,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1-edge,y,z1-w_offset-edge]
-   v2=[x1,y,z1-w_offset-edge]
-   v3=[x1,y,z1-w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):
-   #上壁の奥2
-   v1=[x1-edge,y,z3+w_offset+edge]
-   v2=[x1,y,z3+w_offset]
-   v3=[x1-edge,y,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1-edge,y,z3+w_offset+edge]
-   v2=[x1,y,z3+w_offset+edge]
-   v3=[x1,y,z3+w_offset]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):
-   #上壁の手前1
-   v1=[x2,y,z1-w_offset]
-   v2=[x2+edge,y,z1-w_offset-edge]
-   v3=[x2+edge,y,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x2,y,z1-w_offset]
-   v2=[x2,y,z1-w_offset-edge]
-   v3=[x2+edge,y,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):
-   #上壁の手前2
-   v1=[x2,y,z3+w_offset]
-   v2=[x2+edge,y,z3+w_offset+edge]
-   v3=[x2+edge,y,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x2,y,z3+w_offset]
-   v2=[x2,y,z3+w_offset+edge]
-   v3=[x2+edge,y,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):
-   #上壁の横1
-   v1=[x2,y,z1-w_offset]
-   v2=[x1,y,z1-w_offset-edge]
-   v3=[x2,y,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):
-   #上壁の横2
-   v1=[x2,y,z3+w_offset]
-   v2=[x1,y,z3+w_offset+edge]
-   v3=[x2,y,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):
-   #横壁の奥1
-   v1=[x1-edge,y,z2-w_offset]
-   v2=[x1-edge,h_offset,z2-w_offset]
-   v3=[x1-edge,h_offset,z1-w_offset-edge]
-   v4=[x1-edge,y,z1-w_offset-edge]
-   write_square(v1,v2,v3,v4)
-if (out=="all" or out=="right"):   
-   #横壁の奥2
-   v1=[x1-edge,y,z2+w_offset]
-   v2=[x1-edge,h_offset,z2+w_offset]
-   v3=[x1-edge,h_offset,z3+w_offset+edge]
-   v4=[x1-edge,y,z3+w_offset+edge]
-   write_square(v4,v3,v2,v1)
-if (out=="all" or out=="left"):
-   #横壁の手前1
-   v1=[x2+edge,y,z1-w_offset-edge]
-   v2=[x2+edge,h_offset,z1-w_offset-edge]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   v4=[x2+edge,y,z2-w_offset]
-   write_square(v1,v2,v3,v4)
-if (out=="all" or out=="right"):
-   #横壁の手前2
-   v1=[x2+edge,y,z3+w_offset+edge]
-   v2=[x2+edge,h_offset,z3+w_offset+edge]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   v4=[x2+edge,y,z2+w_offset]
-   write_square(v4,v3,v2,v1)
-if (out=="all" or out=="left"):   
-   #横壁の横1
-   v1=[x1-edge,y,z1-w_offset-edge]
-   v2=[x1-edge,h_offset,z1-w_offset-edge]
-   v3=[x1,y,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-   v1=[x1,y,z1-w_offset-edge]
-   v2=[x1-edge,h_offset,z1-w_offset-edge]
-   v3=[x2,y,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-   v1=[x2,y,z1-w_offset-edge]
-   v2=[x1-edge,h_offset,z1-w_offset-edge]
-   v3=[x2+edge,y,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-   v1=[x2+edge,y,z1-w_offset-edge]
-   v2=[x1-edge,h_offset,z1-w_offset-edge]
-   v3=[x2+edge,h_offset,z1-w_offset-edge]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):
-   #横壁の横2
-   v1=[x1-edge,y,z3+w_offset+edge]
-   v2=[x1-edge,h_offset,z3+w_offset+edge]
-   v3=[x1,y,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-   v1=[x1,y,z3+w_offset+edge]
-   v2=[x1-edge,h_offset,z3+w_offset+edge]
-   v3=[x2,y,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-   v1=[x2,y,z3+w_offset+edge]
-   v2=[x1-edge,h_offset,z3+w_offset+edge]
-   v3=[x2+edge,y,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-   v1=[x2+edge,y,z3+w_offset+edge]
-   v2=[x1-edge,h_offset,z3+w_offset+edge]
-   v3=[x2+edge,h_offset,z3+w_offset+edge]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):   
-   #断面の奥1
-   v1=[x1,y,z2-w_offset]
-   v2=[x1-edge,h_offset,z2-w_offset]
-   v3=[x1-edge,y,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1,y,z2-w_offset]
-   v2=[x1,y2,z2-w_offset]
-   v3=[x1-edge,h_offset,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1,y2,z2-w_offset]
-   v2=[x1,max_height,z2-w_offset]
-   v3=[x1-edge,h_offset,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1,max_height,z2-w_offset]
-   v2=[x1,max_height+1,z2-w_offset]
-   v3=[x1-edge,h_offset,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1,max_height+1,z2-w_offset]
-   v2=[x1,h_offset,z2-w_offset]
-   v3=[x1-edge,h_offset,z2-w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):   
-   #断面の奥2
-   v1=[x1,y,z2+w_offset]
-   v2=[x1-edge,h_offset,z2+w_offset]
-   v3=[x1-edge,y,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1,y,z2+w_offset]
-   v2=[x1,y2,z2+w_offset]
-   v3=[x1-edge,h_offset,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1,y2,z2+w_offset]
-   v2=[x1,max_height,z2+w_offset]
-   v3=[x1-edge,h_offset,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1,max_height,z2+w_offset]
-   v2=[x1,max_height+1,z2+w_offset]
-   v3=[x1-edge,h_offset,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1,max_height+1,z2+w_offset]
-   v2=[x1,h_offset,z2+w_offset]
-   v3=[x1-edge,h_offset,z2+w_offset]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):   
-   #断面の手前1
-   v1=[x2,y,z2-w_offset]
-   v2=[x2+edge,h_offset,z2-w_offset]
-   v3=[x2+edge,y,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x2,y,z2-w_offset]
-   v2=[x2,y5,z2-w_offset]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x2,y5,z2-w_offset]
-   v2=[x2,max_height,z2-w_offset]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x2,max_height,z2-w_offset]
-   v2=[x2,max_height+1,z2-w_offset]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x2,max_height+1,z2-w_offset]
-   v2=[x2,h_offset,z2-w_offset]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="right"):
-   #断面の手前2
-   v1=[x2,y,z2+w_offset]
-   v2=[x2+edge,h_offset,z2+w_offset]
-   v3=[x2+edge,y,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x2,y,z2+w_offset]
-   v2=[x2,y5,z2+w_offset]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x2,y5,z2+w_offset]
-   v2=[x2,max_height,z2+w_offset]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x2,max_height,z2+w_offset]
-   v2=[x2,max_height+1,z2+w_offset]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x2,max_height+1,z2+w_offset]
-   v2=[x2,h_offset,z2+w_offset]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="left"):   
-   #底1 
-   v1=[x1-edge,h_offset,z1-w_offset-edge]
-   v2=[x1,h_offset,z2-w_offset]
-   v3=[x1-edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1-edge,h_offset,z1-w_offset-edge]
-   v2=[x2,h_offset,z2-w_offset]
-   v3=[x1,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1-edge,h_offset,z1-w_offset-edge]
-   v2=[x2+edge,h_offset,z2-w_offset]
-   v3=[x2,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   v1=[x1-edge,h_offset,z1-w_offset-edge]
-   v2=[x2+edge,h_offset,z1-w_offset-edge]
-   v3=[x2+edge,h_offset,z2-w_offset]
-   write_triangle(v3,v2,v1)
-   
-if (out=="all" or out=="right"):   
-   #底2
-   v1=[x1-edge,h_offset,z3+w_offset+edge]
-   v2=[x1,h_offset,z2+w_offset]
-   v3=[x1-edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1-edge,h_offset,z3+w_offset+edge]
-   v2=[x2,h_offset,z2+w_offset]
-   v3=[x1,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1-edge,h_offset,z3+w_offset+edge]
-   v2=[x2+edge,h_offset,z2+w_offset]
-   v3=[x2,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-   v1=[x1-edge,h_offset,z3+w_offset+edge]
-   v2=[x2+edge,h_offset,z3+w_offset+edge]
-   v3=[x2+edge,h_offset,z2+w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="left"):   
-   ###凸
-   v1=[x2,max_height+1,z2-w_offset]
-   v2=[x2-1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   v3=[x1+1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   v4=[x1,max_height+1,z2-w_offset]
-   write_square(v1,v2,v3,v4)
-   
-   v1=[x2-1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   v2=[x2,h_offset,z2-w_offset]
-   v3=[x1,h_offset,z2-w_offset]
-   v4=[x1+1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   write_square(v1,v2,v3,v4)
-   
-   v1=[x2-1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   v2=[x2,max_height+1,z2-w_offset]
-   v3=[x2,h_offset,z2-w_offset]
-   write_triangle(v1,v2,v3)
-   
-   v1=[x1+1,max_height+1+(h_offset-max_height)/2,z2-w_offset+2]
-   v2=[x1,h_offset,z2-w_offset]
-   v3=[x1,max_height+1,z2-w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):   
-   ###凹
-   v1=[x2,max_height+1,z2+w_offset]
-   v2=[x2,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   v3=[x1,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   v4=[x1,max_height+1,z2+w_offset]
-   write_square(v4,v3,v2,v1)
-   
-   v1=[x2,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   v2=[x2,h_offset,z2+w_offset]
-   v3=[x1,h_offset,z2+w_offset]
-   v4=[x1,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   write_square(v4,v3,v2,v1)
-   
-   v1=[x2,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   v2=[x2,max_height+1,z2+w_offset]
-   v3=[x2,h_offset,z2+w_offset]
-   write_triangle(v3,v2,v1)
-   
-   v1=[x1,max_height+1+(h_offset-max_height)/2,z2+w_offset+3]
-   v2=[x1,h_offset,z2+w_offset]
-   v3=[x1,max_height+1,z2+w_offset]
-   write_triangle(v3,v2,v1)
-if (out=="all" or out=="left"):   
-   #断面埋め1
-   v1=[x2,max_height+1,z2-w_offset]
-   v2=[x1,max_height+1,z2-w_offset]
-   v3=[x1,max_height,z2-w_offset]
-   write_triangle(v1,v2,v3)
-if (out=="all" or out=="right"):   
-   #断面埋め2
-   v1=[x2,max_height+1,z2+w_offset]
-   v2=[x1,max_height+1,z2+w_offset]
-   v3=[x1,max_height,z2+w_offset]
-   write_triangle(v3,v2,v1)
+        :param add_to_menu: Flag indicating whether the action should also
+            be added to the menu. Defaults to True.
+        :type add_to_menu: bool
 
-print "endsolid"
+        :param add_to_toolbar: Flag indicating whether the action should also
+            be added to the toolbar. Defaults to True.
+        :type add_to_toolbar: bool
 
+        :param status_tip: Optional text to show in a popup when mouse pointer
+            hovers over the action.
+        :type status_tip: str
+
+        :param parent: Parent widget for the new action. Defaults None.
+        :type parent: QWidget
+
+        :param whats_this: Optional text to show in the status bar when the
+            mouse pointer hovers over the action.
+
+        :returns: The action that was created. Note that the action is also
+            added to self.actions list.
+        :rtype: QAction
+        """
+
+        icon = QIcon(icon_path)
+        action = QAction(icon, text, parent)
+        action.triggered.connect(callback)
+        action.setEnabled(enabled_flag)
+
+        if status_tip is not None:
+            action.setStatusTip(status_tip)
+
+        if whats_this is not None:
+            action.setWhatsThis(whats_this)
+
+        if add_to_toolbar:
+            self.toolbar.addAction(action)
+
+        if add_to_menu:
+            self.iface.addPluginToMenu(
+                self.menu,
+                action)
+
+        self.actions.append(action)
+
+        return action
+
+    def initGui(self):
+        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+
+        icon_path = ':/plugins/Chiriin3D_reverse/icon.png'
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Chiriin3D reverse'),
+            callback=self.run,
+            parent=self.iface.mainWindow())
+        icon_path=""
+        self.add_action(
+            icon_path,
+            text=self.tr(u'help'),
+            callback=self.info,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False)
+
+    def unload(self):
+        """Removes the plugin menu item and icon from QGIS GUI."""
+        for action in self.actions:
+            self.iface.removePluginMenu(
+                self.tr(u'&Chiriin3D reverse'),
+                action)
+            self.iface.removeToolBarIcon(action)
+
+
+    def run(self):
+        """Run method that performs all the real work"""
+        self.dlg.toolButton.clicked.connect(self.openBrowse)
+        self.dlg.pushButton.clicked.connect(self.run_reverse)
+        self.dlg.pushButton_2.clicked.connect(self.reject)
+        self.dlg.radioButton.toggled.connect(self.change_name)
+        self.dlg.radioButton_2.toggled.connect(self.change_name)
+        self.dlg.radioButton_3.toggled.connect(self.change_name)
+        # show the dialog
+        self.dlg.show()
+        # Run the dialog event loop
+        result = self.dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
+    def openBrowse(self):
+        stlfile =  QFileDialog().getOpenFileName(self.dlg, "stl file", '', 'STL files (*.stl)')
+        if stlfile != "":
+            root, ext = os.path.splitext(stlfile)
+            self.input = stlfile
+            self.output = root + "_reverse_all" + ext
+            self.dlg.radioButton_3.setChecked(True)
+            self.dlg.lineEdit.setText(self.input)
+            self.dlg.lineEdit_2.setText(self.output)
+
+    def change_name(self):
+        if self.dlg.radioButton.isChecked():
+           type="left"
+        elif self.dlg.radioButton_2.isChecked():
+           type="right"
+        else:
+           type="all"
+        inputpath = self.dlg.lineEdit.text()
+        if inputpath!="":
+           root, ext = os.path.splitext(inputpath)
+           self.output = root + "_reverse_" + type + ext
+           self.dlg.lineEdit_2.setText(self.output)
+
+    def run_reverse(self):
+        if self.dlg.radioButton.isChecked():
+           type="left"
+        elif self.dlg.radioButton_2.isChecked():
+           type="right"
+        else:
+           type="all"
+        reverse.run(self.input,self.output,type)
+        QMessageBox.information(self.dlg, "", "finished!")
+
+    def reject(self):
+        self.dlg.reject()
+
+    def info(self):
+        html =u"""
+        <h1>Chiriin3D reverse</h1>
+        <h2>使い方</h2>
+        <ol>
+        <li>地理院地図3Dのstlファイルを選択します</li> 
+        <li>出力したいパーツを選択します。（左、右、左右）</li>
+        <li>[run] ボタンを押すと裏返したstlファイルが作成されます </li>
+        </ol>
+        ※地理院地図3Dのデータを利用する際は、その規約に従ってください。
+        """
+        QMessageBox.information(self.dlg, "Information:", html)

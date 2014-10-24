@@ -4,18 +4,25 @@ chiriin3d_reverse
 
 ![model](model.jpg)![kanten](kanten.jpg)![mountain](mountain.jpg)   
 
-##使い方
+##使い方1
+
+QGIS起動→【プラグイン(p)】→【プラグイン管理とインストール】→【プラグインマネージャ】→【設定】→【プラグインリポジトリ】で以下のURLを追加した後、「Chiriin3D reverse」を有効にしてください。
+
+http://map.ecoris.info/plugins.xml
+
+##使い方2
+
 pythonコマンドで以下のように実行してください。
 
 ```
-python chiriin3d_reverse.py dem.stl all > dem_reverse.stl
+python reverse.py dem.stl dem_reverse.stl all
 ```
 
 引数部分は、
-- 引数1: 地理院地図3Dからダウンロードしたstlデータ
-- 引数2: 出力する部分。all(全部)、left(左側)、right(右側) を出力
+- 引数1: 地理院地図3Dからダウンロードしたstlデータ名
+- 引数2: 出力するstlデータ名
+- 引数3: 出力する部分。all(全部)、left(左側)、right(右側) を出力
 
-出力は、stlのテキストを標準出力に書き出すので リダイレクト > でファイルに保存してください。
 
 ##3Dプリント
 1. [meshlab](http://meshlab.sourceforge.net/)などでstlデータを確認してください。   
