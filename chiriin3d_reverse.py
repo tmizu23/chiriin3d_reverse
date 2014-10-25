@@ -205,7 +205,7 @@ class Chiriin3D_reverse:
             # substitute with your code.
             pass
     def openBrowse(self):
-        stlfile =  QFileDialog().getOpenFileName(self.dlg, "stl file", '', 'STL files (*.stl)')
+        stlfile =  QFileDialog.getOpenFileName(self.dlg, "stl file", '', 'STL files (*.stl)')
         if stlfile != "":
             root, ext = os.path.splitext(stlfile)
             self.input = stlfile
