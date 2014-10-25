@@ -28,6 +28,9 @@ import resources_rc
 from chiriin3d_reverse_dialog import Chiriin3D_reverseDialog
 import os.path
 import reverse
+import webbrowser
+import platform
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform
 
 class Chiriin3D_reverse:
     """QGIS Plugin Implementation."""
@@ -185,6 +188,7 @@ class Chiriin3D_reverse:
 
     def run(self):
         """Run method that performs all the real work"""
+        self.dlg.pushButton_3.clicked.connect(self.openWeb)
         self.dlg.toolButton.clicked.connect(self.openBrowse)
         self.dlg.pushButton.clicked.connect(self.run_reverse)
         self.dlg.pushButton_2.clicked.connect(self.reject)
@@ -236,6 +240,33 @@ class Chiriin3D_reverse:
     def reject(self):
         self.dlg.reject()
 
+    def openWeb(self):
+        map_canvas = self.iface.mapCanvas()
+        extent = map_canvas.mapRenderer().extent()
+        if map_canvas.hasCrsTransformEnabled():
+           crs_map = map_canvas.mapRenderer().destinationCrs()
+        else:
+           legend = self.iface.legendInterface()
+           if len(legend.layers())==0:
+              QMessageBox.information(self.dlg, "", u"please add layer")
+              return
+           else:
+              crs_map = legend.layers()[0].crs()
+        if crs_map.authid() != u'EPSG:4326':
+           crs_4326 = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
+           extent= QgsCoordinateTransform(crs_map, crs_4326).transform(extent)
+
+        lon=(extent.xMinimum()+extent.xMaximum())/2
+        lat=(extent.yMinimum()+extent.yMaximum())/2
+        url="http://cyberjapandata.gsi.go.jp/3d/site/index.html?lat=" + str(lat) + "&lon=" + str(lon) + "&z=14"
+        myos = platform.system()
+        if myos =="Darwin":
+           browserstr='macosx'
+        else:
+           browserstr='windows-default'
+
+        br=webbrowser.get(browserstr)
+        br.open_new_tab(url)
     def info(self):
         html =u"""
         <h1>Chiriin3D reverse</h1>
