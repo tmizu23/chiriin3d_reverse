@@ -206,7 +206,7 @@ class Chiriin3D_reverse:
             pass
     def openBrowse(self):
         stlfile =  QFileDialog.getOpenFileName(self.dlg, "stl file", '', 'STL files (*.stl)')
-        if stlfile != "":
+        if stlfile:
             root, ext = os.path.splitext(stlfile)
             self.input = stlfile
             self.output = root + "_reverse_all" + ext
@@ -266,7 +266,8 @@ class Chiriin3D_reverse:
            browserstr='windows-default'
 
         br=webbrowser.get(browserstr)
-        br.open_new_tab(url)
+        br.open(url,new=2)
+
     def info(self):
         html =u"""
         <h1>Chiriin3D reverse</h1>
