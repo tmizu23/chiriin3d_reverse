@@ -204,6 +204,14 @@ class Chiriin3D_reverse:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+        self.dlg.pushButton_3.clicked.disconnect(self.openWeb)
+        self.dlg.toolButton.clicked.disconnect(self.openBrowse)
+        self.dlg.pushButton.clicked.disconnect(self.run_reverse)
+        self.dlg.pushButton_2.clicked.disconnect(self.reject)
+        self.dlg.radioButton.toggled.disconnect(self.change_name)
+        self.dlg.radioButton_2.toggled.disconnect(self.change_name)
+        self.dlg.radioButton_3.toggled.disconnect(self.change_name)
+
     def openBrowse(self):
         stlfile =  QFileDialog.getOpenFileName(self.dlg, "stl file", '', 'STL files (*.stl)')
         if stlfile:
@@ -260,13 +268,14 @@ class Chiriin3D_reverse:
         lat=(extent.yMinimum()+extent.yMaximum())/2
         url="http://cyberjapandata.gsi.go.jp/3d/site/index.html?lat=" + str(lat) + "&lon=" + str(lon) + "&z=14"
         myos = platform.system()
-        if myos =="Darwin":
-           browserstr='macosx'
-        else:
-           browserstr='windows-default'
+        #if myos =="Darwin":
+        #   browserstr='macosx'
+        #else:
+        #   browserstr='windows-default'
 
-        br=webbrowser.get(browserstr)
-        br.open(url,new=2)
+        #br=webbrowser.get(browserstr)
+        #br.open(url,new=2)
+        webbrowser.open(url,new=2)
 
     def info(self):
         html =u"""
