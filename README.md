@@ -2,7 +2,7 @@ chiriin3d_reverse
 =================
 これは[地理院地図3D](http://cyberjapandata.gsi.go.jp/3d/)を裏返して型にするプログラムです。3Dプリンタで印刷したのち、お好きなものを流し込みください。   
 
-![stl](stl.png)![stl_reverse](stl_reverse.png)![3dprinter](3dprinter.jpg) 
+![stl](stl.png)![reversed_stl](reversed_stl.png)![3dprinter](3dprinter.jpg) 
 ![model](model.jpg)![jelly](jelly.jpg)![foodstuff](foodstuff.jpg)
 ![jelly_mountain](jelly_mountain.jpg)![geological_profile](geological_profile.jpg)![chocholate_mountain](chocholate_mountain.jpg) 
 
